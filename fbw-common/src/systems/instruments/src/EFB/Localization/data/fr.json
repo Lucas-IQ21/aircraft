@@ -699,5 +699,9 @@
       "StatusBarWarning": "Veuillez mettre à jour votre avion à l'aide du programme d'installation FlyByWire."
     },
     "Title": "Nouvelle version disponible"
+  },
+  "Time": {
+    "Title": "Heure",
+    "Test": "Test"
   }
 }

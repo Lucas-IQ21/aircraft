@@ -3,12 +3,12 @@
 
 import React from 'react';
 import { Navbar, t, PageLink, PageRedirect, TabRoutes } from '@flybywiresim/flypad';
-import { ServicesPage } from './Pages/Services/ServicesPage';
-import { PushbackPage } from './Pages/Pushback/PushbackPage';
-import { PayloadPage } from './Pages/Payload/PayloadPage';
-import { Fuel } from './Pages/Fuel/Fuel';
+import { ServicesPage } from '../Ground/Pages/Services/ServicesPage';
+import { PushbackPage } from '../Ground/Pages/Pushback/PushbackPage';
+import { PayloadPage } from '../Ground/Pages/Payload/PayloadPage';
+import { Fuel } from '../Ground/Pages/Fuel/Fuel'
 
-export const Ground = () => {
+export const Time = () => {
   const tabs: PageLink[] = [
     { name: 'Services', alias: t('Ground.Services.Title'), component: <ServicesPage /> },
     { name: 'Fuel', alias: t('Ground.Fuel.Title'), component: <Fuel /> },
@@ -20,10 +20,10 @@ export const Ground = () => {
     <div className="transform-gpu">
       <div className="relative mb-4">
         <h1 className="font-bold">{t('Time.Title')}</h1>
-        <Navbar className="absolute right-0 top-0" tabs={tabs} basePath="/ground" />
+        <Navbar className="absolute right-0 top-0" tabs={tabs} basePath="/time" />
       </div>
-      <PageRedirect basePath="/ground" tabs={tabs} />
-      <TabRoutes basePath="/ground" tabs={tabs} />
+      <PageRedirect basePath="/time" tabs={tabs} />
+      <TabRoutes basePath="/time" tabs={tabs} />
     </div>
   );
 };

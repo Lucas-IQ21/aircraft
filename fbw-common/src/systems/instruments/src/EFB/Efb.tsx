@@ -44,6 +44,7 @@ import { Dashboard } from './Dashboard/Dashboard';
 import { Dispatch } from './Dispatch/Dispatch';
 import { Ground } from './Ground/Ground';
 import { Performance } from './Performance/Performance';
+import { Time } from './Time/Time';
 import { Navigation } from './Navigation/Navigation';
 import { ATC } from './ATC/ATC';
 import { Settings } from './Settings/Settings';
@@ -435,6 +436,7 @@ export const Efb: React.FC<EfbProps> = ({ aircraftChecklistsProp }) => {
                     <Route path="/dispatch" component={Dispatch} />
                     <Route path="/ground" component={Ground} />
                     <Route path="/performance" component={Performance} />
+                    <Route path= "/time" component={Time} />
                     <Route path="/navigation" component={Navigation} />
                     <Route path="/atc" component={ATC} />
                     <Route path="/failures" component={Failures} />
