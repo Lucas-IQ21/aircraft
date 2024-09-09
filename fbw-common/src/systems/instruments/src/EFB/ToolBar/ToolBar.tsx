@@ -12,6 +12,7 @@ import {
   Calculator,
   JournalCheck,
   Sliders,
+  Clock,
 } from 'react-bootstrap-icons';
 import { NavLink } from 'react-router-dom';
 import { t } from '../Localization/translation';
@@ -66,6 +67,9 @@ export const ToolBar = () => (
       </ToolBarButton>
       <ToolBarButton to="/presets" tooltipText={t('Presets.Title')}>
         <Sliders size={35} />
+      </ToolBarButton>
+      <ToolBarButton to ="/time" tooltipText={t('Time.Title')}>
+        <Clock size={35} />
       </ToolBarButton>
     </div>
 

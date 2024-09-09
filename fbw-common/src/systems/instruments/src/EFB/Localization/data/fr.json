@@ -702,6 +702,7 @@
   },
   "Time": {
     "Title": "Heure",
+    "ActualTimeIs": "L'heure actuelle est : ",
     "Test": "Test"
   }
 }
