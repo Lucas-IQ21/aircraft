@@ -63,6 +63,7 @@ import {
   TakeoffPacks,
   TakeoffPowerSetting,
 } from '@fmgc/flightplanning/plans/performance/FlightPlanPerformanceData';
+import { Lrc } from '../../shared/Lrc';
 
 interface MfdFmsPerfProps extends AbstractMfdPageProps {}
 
@@ -545,6 +546,8 @@ export class MfdFmsPerf extends FmsPage<MfdFmsPerfProps> {
   private crzTablePredLine3 = Subject.create<string | null>(null);
 
   private destAirportIdent = Subject.create<string>('');
+
+  private crzTableLrcMachSpeed = Subject.create<string | null>(null);
 
   private readonly destEta = Subject.create<string>('--:--');
 
@@ -1169,6 +1172,37 @@ export class MfdFmsPerf extends FmsPage<MfdFmsPerfProps> {
           );
           this.crzTablePredLine2.set('');
         }
+      }
+
+      // Compute LRC
+      const pd = this.loadedFlightPlan?.performanceData;
+      const crzFL = pd?.cruiseFlightLevel?.get();
+      const grossWeightKg = SimVar.GetSimVarValue('TOTAL WEIGHT', 'pounds') * 0.453592;
+      const isaDev =
+        SimVar.GetSimVarValue('AMBIENT TEMPERATURE', 'celsius') -
+        SimVar.GetSimVarValue('STANDARD ATM TEMPERATURE', 'celsius');
+      if (this.activeFlightPhase.get() >= FmgcFlightPhase.Cruise && crzFL > 0) {
+        const lrc = new Lrc({
+          GW: grossWeightKg,
+          FL: crzFL * 100,
+          ISA_dev: isaDev,
+          S: 845,
+          CD0: 0.022,
+          k: 0.045,
+          TSFC_base: 1.9e-5,
+          machMin: 0.75,
+          machMax: 0.88,
+          machStep: 0.002,
+        });
+
+        const lrcComputed = lrc.computeLRC();
+        if (Number.isFinite(lrcComputed.M_lrc) && lrcComputed.M_lrc > 0) {
+          this.crzTableLrcMachSpeed.set(lrcComputed.M_lrc.toFixed(2).replace('0.', '.'));
+        } else {
+          this.crzTableLrcMachSpeed.set('-.--');
+        }
+      } else {
+        this.crzTableLrcMachSpeed.set('-.--');
       }
 
       // Update CRZ speed table
@@ -2697,7 +2731,7 @@ export class MfdFmsPerf extends FmsPage<MfdFmsPerfProps> {
                     <div class="mfd-label">LRC</div>
                   </div>
                   <div class="mfd-fms-perf-speed-table-cell" style="border-bottom: none; padding: 5px;">
-                    <span class={{ 'mfd-value': true, sec: this.secActive }}>.84</span>
+                    <span class={{ 'mfd-value': true, sec: this.secActive }}>{this.crzTableLrcMachSpeed}</span>
                   </div>
                   <div class="mfd-fms-perf-speed-table-cell" style="border-bottom: none; padding: 5px;">
                     <div class="mfd-label-value-container">
