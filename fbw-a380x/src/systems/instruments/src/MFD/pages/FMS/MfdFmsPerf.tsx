@@ -64,6 +64,8 @@ import {
   TakeoffPowerSetting,
 } from '@fmgc/flightplanning/plans/performance/FlightPlanPerformanceData';
 import { Lrc } from '../../shared/Lrc';
+import { A380AircraftConfig } from '@fmgc/flightplanning/A380AircraftConfig';
+import { ADIRS } from '../../shared/Adirs';
 
 interface MfdFmsPerfProps extends AbstractMfdPageProps {}
 
@@ -1173,29 +1175,49 @@ export class MfdFmsPerf extends FmsPage<MfdFmsPerfProps> {
           this.crzTablePredLine2.set('');
         }
       }
-
       // Compute LRC
-      const pd = this.loadedFlightPlan?.performanceData;
-      const crzFL = pd?.cruiseFlightLevel?.get();
-      const grossWeightKg = SimVar.GetSimVarValue('TOTAL WEIGHT', 'pounds') * 0.453592;
-      const isaDev =
-        SimVar.GetSimVarValue('AMBIENT TEMPERATURE', 'celsius') -
-        SimVar.GetSimVarValue('STANDARD ATM TEMPERATURE', 'celsius');
-      if (this.activeFlightPhase.get() >= FmgcFlightPhase.Cruise && crzFL > 0) {
-        const lrc = new Lrc({
-          GW: grossWeightKg,
-          FL: crzFL * 100,
-          ISA_dev: isaDev,
-          S: 845,
-          CD0: 0.022,
-          k: 0.045,
-          TSFC_base: 1.9e-5,
+      if (this.activeFlightPhase.get() >= FmgcFlightPhase.Cruise) {
+        const grossWeightKg = this.props.fmcService.master.fmgc.getGrossWeightKg();
+        const pressureWord = ADIRS.getCorrectedAverageStaticPressure();
+        const temperatureWord = ADIRS.getStaticAirTemperature();
+        const altitudeWord = ADIRS.getBaroCorrectedAltitude();
+        if (
+          !pressureWord?.isNormalOperation() ||
+          !temperatureWord?.isNormalOperation() ||
+          !altitudeWord?.isNormalOperation()
+        ) {
+          this.crzTableLrcMachSpeed.set('-.--');
+          return;
+        }
+        const pressureHpa = pressureWord.value;
+        const satC = temperatureWord.value;
+        const pressureAltitudeFt = altitudeWord.value;
+
+        if (this.activeFlightPhase.get() < FmgcFlightPhase.Cruise || pressureAltitudeFt < 15000) {
+          this.crzTableLrcMachSpeed.set('-.--');
+          return;
+        }
+        const delta = pressureHpa / 1013.25;
+        const theta = (satC + 273.15) / 288.15;
+        if (delta <= 0 || theta <= 0) {
+          this.crzTableLrcMachSpeed.set('-.--');
+          return;
+        }
+
+        const costIndex = this.costIndex.get() ?? 0;
+        const lrc = new Lrc(A380AircraftConfig.flightModelParameters, A380AircraftConfig.engineModelParameters, {
+          GW_kg: grossWeightKg,
+          pressureAltitudeFt,
+          delta,
+          theta,
           machMin: 0.75,
           machMax: 0.88,
           machStep: 0.002,
+          costIndex,
         });
 
         const lrcComputed = lrc.computeLRC();
+
         if (Number.isFinite(lrcComputed.M_lrc) && lrcComputed.M_lrc > 0) {
           this.crzTableLrcMachSpeed.set(lrcComputed.M_lrc.toFixed(2).replace('0.', '.'));
         } else {
