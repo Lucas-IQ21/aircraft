@@ -579,6 +579,8 @@ export class MfdFmsPerf extends FmsPage<MfdFmsPerfProps> {
 
   private crzTableLrcMachSpeed = Subject.create<string | null>(null);
 
+  private crzTableLrcMachSpeed = Subject.create<string | null>(null);
+
   private readonly destEta = Subject.create<string>('--:--');
 
   private readonly destEfob = NumberUnitSubject.create(UnitType.KILOGRAM.createNumber(NaN));
